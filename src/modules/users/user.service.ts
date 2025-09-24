@@ -1,46 +1,67 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDTO } from './domain/dto/createUser.dto';
 import { UpdateUserDTO } from './domain/dto/updateUser.dto';
+import * as bcrypt from 'bcrypt';
+import { userSelectFields } from '../prisma/utils/userSelectFields';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async checkUserExists(id: number): Promise<void> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+  private async checkUserExists(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: userSelectFields,
+    });
 
-    if(!user) {
-      throw new NotFoundException('User Not Found');
-    }
-  }
-
-  async create(body: CreateUserDTO): Promise<User> {
-    return await this.prisma.user.create({ data: body })
-  }
-
-  async list() {
-    return await this.prisma.user.findMany();
-  }
-
-  async show(id: number) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-
-    if(!user) {
+    if (!user) {
       throw new NotFoundException('User Not Found');
     }
 
     return user;
   }
 
+  private async hashPassword(password: string) {
+    return await bcrypt.hash(password, 10);
+  }
+
+  async create(body: CreateUserDTO): Promise<User> {
+    body.password = await this.hashPassword(body.password);
+    return await this.prisma.user.create({
+      data: body,
+      select: userSelectFields,
+    });
+  }
+
+  async list() {
+    return await this.prisma.user.findMany({
+      select: userSelectFields,
+    });
+  }
+
+  async show(id: number) {
+    const user = await this.checkUserExists(id);
+    return user;
+  }
+
   async update(id: number, body: UpdateUserDTO) {
     await this.checkUserExists(id);
-    return await this.prisma.user.update({ where: { id }, data: body });
+
+    if (body.password) {
+      body.password = await this.hashPassword(body.password);
+    }
+
+    return await this.prisma.user.update({
+      where: { id },
+      data: body,
+      select: userSelectFields,
+    });
   }
 
   async delete(id: number) {
-    await this.checkUserExists(id)
-    return await this.prisma.user.delete({ where: { id }});
+    await this.checkUserExists(id);
+    return await this.prisma.user.delete({ where: { id } });
   }
 }
