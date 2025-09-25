@@ -64,4 +64,11 @@ export class UserService {
     await this.checkUserExists(id);
     return await this.prisma.user.delete({ where: { id } });
   }
+
+  async findByEmail(email: string) {
+    return await this.prisma.user.findUnique({
+      where: { email },
+      select: userSelectFields,
+    });
+  }
 }
