@@ -10,7 +10,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../users/user.service';
 import { CreateUserDTO } from '../users/domain/dto/createUser.dto';
-import { AuthRegister } from './domain/dto/authRegister.dto';
+import { AuthRegisterDTO } from './domain/dto/authRegister.dto';
+import { AuthResetPasswordDTO } from './domain/dto/authResetPassword.dto';
 
 @Injectable()
 export class AuthService {
@@ -40,7 +41,7 @@ export class AuthService {
     return await this.generateJwtToken(user);
   }
 
-  async register(body: AuthRegister) {
+  async register(body: AuthRegisterDTO) {
     if (!body.email || !body.name || !body.password) {
       throw new BadRequestException('Email, name and password are required!');
     }
@@ -53,6 +54,16 @@ export class AuthService {
     };
 
     const user = await this.userService.create(newUser);
+
+    return await this.generateJwtToken(user);
+  }
+
+  async resetPassword({ token, password }: AuthResetPasswordDTO) {
+    const { valid, decoded } = await this.jwtService.verifyAsync(token);
+
+    if (!valid) throw new UnauthorizedException('Invalid token');
+
+    const user = await this.userService.update(decoded.sub, { password });
 
     return await this.generateJwtToken(user);
   }
