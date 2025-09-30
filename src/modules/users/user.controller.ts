@@ -1,15 +1,29 @@
-import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDTO } from './domain/dto/createUser.dto';
 import { UpdateUserDTO } from './domain/dto/updateUser.dto';
 import { ParamId } from 'src/shared/decorators/paramId.decorator';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { User } from 'src/shared/decorators/user.decorator';
+import * as client from '@prisma/client';
 
+@UseGuards(AuthGuard)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  list() {
+  list(@User() user: client.User) {
+    console.log(user);
     return this.userService.list();
   }
 
@@ -30,7 +44,6 @@ export class UserController {
 
   @Delete(':id')
   deleteUser(@ParamId() id: number) {
-    return this.userService.delete(id)
+    return this.userService.delete(id);
   }
-
 }
