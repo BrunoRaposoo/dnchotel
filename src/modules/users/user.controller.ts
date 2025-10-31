@@ -2,11 +2,15 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
+  ParseFilePipe,
   Patch,
   Post,
-  Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDTO } from './domain/dto/createUser.dto';
@@ -19,6 +23,8 @@ import { Roles } from 'src/shared/decorators/roles.decorator';
 import { RoleGuard } from 'src/shared/guards/role.guard';
 import { UserMatchGuard } from 'src/shared/guards/usermatch.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileValidationInterceptor } from 'src/shared/interceptors/filevalidation.interceptor';
 
 @UseGuards(AuthGuard, RoleGuard, ThrottlerGuard)
 @Controller('users')
@@ -53,5 +59,23 @@ export class UserController {
   @Delete(':id')
   deleteUser(@ParamId() id: number) {
     return this.userService.delete(id);
+  }
+
+  @UseInterceptors(FileInterceptor('avatar'), FileValidationInterceptor)
+  @Post('avatar')
+  uploadAvatar(
+    @User('id') id: number,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 900 * 1024,
+          }),
+        ],
+      }),
+    )
+    avatar: Express.Multer.File,
+  ) {
+    return this.userService.uploadAvatar(id, avatar.filename);
   }
 }
