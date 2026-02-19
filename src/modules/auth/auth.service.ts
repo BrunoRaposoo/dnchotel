@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { AuthLoginDTO } from './domain/dto/authLogin.dto';
 import * as bcrypt from 'bcrypt';
@@ -25,8 +25,8 @@ export class AuthService {
 
   async generateJwtToken(user: User, expiresIn: string = '1d') {
     const payload = { sub: user.id, name: user.name };
-    const options = {
-      expiresIn: expiresIn,
+    const options: JwtSignOptions = {
+      expiresIn: expiresIn as any,
       issuer: 'dnc_hotel',
       audience: 'users',
     };
@@ -90,7 +90,7 @@ export class AuthService {
   async validateToken(token: string): Promise<ValidateTokenDTO> {
     try {
       const decoded = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JTW_SECRET,
+        secret: process.env.JWT_SECRET,
         issuer: 'dnc_hotel',
         audience: 'users',
       });

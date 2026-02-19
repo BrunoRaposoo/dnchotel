@@ -3,12 +3,12 @@ import { HOTEL_REPOSITORY_TOKEN } from '../utils/repositoriesToken';
 import type { IHotelRepository } from '../domain/repositories/IHotel.repositories';
 
 @Injectable()
-export class FindOneHotelsService {
+export class FindByNameHotelService {
   constructor(
     @Inject(HOTEL_REPOSITORY_TOKEN)
     private readonly hotelRepositories: IHotelRepository,
   ) {}
-  async findOne(id: number) {
-    return await this.hotelRepositories.findHotelById(id);
+  async findByName(name: string) {
+    return await this.hotelRepositories.findHotelByName(name);
   }
 }

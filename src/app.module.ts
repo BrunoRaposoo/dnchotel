@@ -5,9 +5,11 @@ import { UserModule } from './modules/users/user.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HotelsModule } from './modules/hotels/hotels.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     PrismaModule,
     UserModule,
@@ -17,11 +19,22 @@ import { HotelsModule } from './modules/hotels/hotels.module';
         limit: 3,
       },
     ]),
-    MailerModule.forRoot({
-      transport: process.env.SMTP,
-      defaults: {
-        from: `"dnc_hotel" <${process.env.EMAIL_USER}>`,
-      },
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('SMTP_HOST'),
+          port: configService.get<number>('SMTP_PORT'),
+          auth: {
+            user: configService.get<string>('SMTP_USER'),
+            pass: configService.get<string>('SMTP_PASS'),
+          },
+        },
+        defaults: {
+          from: `"dnc_hotel" <${configService.get<string>('EMAIL_USER')}>`,
+        },
+      }),
     }),
     HotelsModule,
   ],

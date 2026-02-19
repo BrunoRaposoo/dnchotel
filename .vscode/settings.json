@@ -4,5 +4,6 @@
   "editor.formatOnType": false,
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
-  "files.autoSave": "afterDelay"
+  "files.autoSave": "afterDelay",
+  "prisma.pinToPrisma6": true
 }
