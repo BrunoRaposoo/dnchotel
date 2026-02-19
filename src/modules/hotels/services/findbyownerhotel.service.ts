@@ -1,16 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateHotelDto } from '../domain/dto/create-hotel.dto';
 import type { IHotelRepository } from '../domain/repositories/IHotel.repositories';
 import { HOTEL_REPOSITORY_TOKEN } from '../utils/repositoriesToken';
 
 @Injectable()
-export class CreateHotelsService {
+export class FindByOwnerHotelService {
   constructor(
     @Inject(HOTEL_REPOSITORY_TOKEN)
     private readonly hotelRepositories: IHotelRepository,
   ) {}
-
-  async execute(createHotelDto: CreateHotelDto) {
-    return await this.hotelRepositories.createHotel(createHotelDto);
+  async findByOwner(ownerId: number) {
+    return await this.hotelRepositories.findHotelByOwner(ownerId);
   }
 }
