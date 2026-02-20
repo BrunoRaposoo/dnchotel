@@ -9,14 +9,17 @@ import { Injectable } from '@nestjs/common';
 export class HotelsRepositories implements IHotelRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  createHotel(data: CreateHotelDto): Promise<Hotel> {
+  createHotel(data: CreateHotelDto, id: number): Promise<Hotel> {
+    data.ownerId = id;
     return this.prisma.hotel.create({ data });
   }
   findHotelById(id: number): Promise<Hotel | null> {
-    return this.prisma.hotel.findUnique({ where: { id } });
+    return this.prisma.hotel.findUnique({ where: { id: Number(id) } });
   }
-  findHotelByName(name: string): Promise<Hotel | null> {
-    return this.prisma.hotel.findFirst({ where: { name } });
+  findHotelByName(name: string): Promise<Hotel[] | null> {
+    return this.prisma.hotel.findMany({
+      where: { name: { contains: name, mode: 'insensitive' } },
+    });
   }
   findHotels(): Promise<Hotel[]> {
     return this.prisma.hotel.findMany();
