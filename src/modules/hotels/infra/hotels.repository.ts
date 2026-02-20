@@ -25,11 +25,9 @@ export class HotelsRepositories implements IHotelRepository {
     return this.prisma.hotel.findMany({ where: { ownerId } });
   }
   updateHotel(id: number, data: UpdateHotelDto): Promise<Hotel> {
-    console.log(id, data);
-    throw new Error('Method not implemented.');
+    return this.prisma.hotel.update({ where: { id }, data });
   }
   deleteHotel(id: number): Promise<Hotel> {
-    console.log(id);
-    throw new Error('Method not implemented.');
+    return this.prisma.hotel.delete({ where: { id } });
   }
 }

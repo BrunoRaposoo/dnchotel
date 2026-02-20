@@ -8,9 +8,13 @@ import { UpdateHotelsService } from './services/updateHotel.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { HOTEL_REPOSITORY_TOKEN } from './utils/repositoriesToken';
 import { HotelsRepositories } from './infra/hotels.repository';
+import { FindByOwnerHotelService } from './services/findbyownerhotel.service';
+import { FindByNameHotelService } from './services/findByNameHotel.service';
+import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../users/user.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule, UserModule],
   controllers: [HotelsController],
   providers: [
     CreateHotelsService,
@@ -18,6 +22,8 @@ import { HotelsRepositories } from './infra/hotels.repository';
     FindOneHotelsService,
     RemoveHotelsService,
     UpdateHotelsService,
+    FindByOwnerHotelService,
+    FindByNameHotelService,
     {
       provide: HOTEL_REPOSITORY_TOKEN,
       useClass: HotelsRepositories,

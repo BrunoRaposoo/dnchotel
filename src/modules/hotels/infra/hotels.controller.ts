@@ -6,6 +6,7 @@ import {
   Patch,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateHotelDto } from '../domain/dto/create-hotel.dto';
 import { UpdateHotelDto } from '../domain/dto/update-hotel.dto';
@@ -17,7 +18,13 @@ import { RemoveHotelsService } from '../services/removeHotel.service';
 import { ParamId } from 'src/shared/decorators/paramId.decorator';
 import { FindByOwnerHotelService } from '../services/findbyownerhotel.service';
 import { FindByNameHotelService } from '../services/findByNameHotel.service';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { RoleGuard } from 'src/shared/guards/role.guard';
+import { Roles } from 'src/shared/decorators/roles.decorator';
+import { Role } from '@prisma/client';
+import { OwnerHotelGuard } from 'src/shared/guards/ownerHotel.guard';
 
+@UseGuards(AuthGuard, RoleGuard)
 @Controller('hotels')
 export class HotelsController {
   constructor(
@@ -30,35 +37,45 @@ export class HotelsController {
     private readonly findHotelByNameService: FindByNameHotelService,
   ) {}
 
+  @Roles(Role.ADMIN)
   @Post()
   create(@Body() createHotelDto: CreateHotelDto) {
     return this.createhotelsService.execute(createHotelDto);
   }
 
+  @Roles(Role.ADMIN, Role.USER)
   @Get()
   findAll() {
     return this.findAllhotelsService.findAll();
   }
 
+  @Roles(Role.ADMIN)
   @Get(':ownerId')
   findOwner(@ParamId() id: number) {
     return this.findHotelByOwnerService.findByOwner(id);
   }
 
+  @Roles(Role.ADMIN, Role.USER)
   @Get('name')
   findName(@Query('name') name: string) {
     return this.findHotelByNameService.findByName(name);
   }
+
+  @Roles(Role.ADMIN, Role.USER)
   @Get(':id')
   findOne(@ParamId() id: number) {
     return this.findOnehotelsService.findOne(id);
   }
 
+  @UseGuards(OwnerHotelGuard)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   update(@ParamId() id: number, @Body() updateHotelDto: UpdateHotelDto) {
     return this.updatehotelsService.update(id, updateHotelDto);
   }
 
+  @UseGuards(OwnerHotelGuard)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@ParamId() id: number) {
     return this.removeHotelsServoce.remove(id);
