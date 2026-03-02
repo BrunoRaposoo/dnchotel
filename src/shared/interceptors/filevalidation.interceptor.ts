@@ -23,6 +23,7 @@ export class FileValidationInterceptor implements NestInterceptor {
             });
           }
         }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return throwError(() => err);
       }),
     );
