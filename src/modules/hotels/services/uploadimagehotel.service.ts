@@ -1,11 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { join, resolve } from 'path';
+import { stat, unlink } from 'fs/promises';
+import { Redis } from 'ioredis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { REDIS_HOTEL_KEY } from '../utils/redisKey';
 import { REPOSITORY_TOKEN_HOTEL } from '../utils/repositoriesToken';
 import type { IHotelRepository } from '../domain/repositories/IHotel.repositories';
-import { join, resolve } from 'path';
-import { unlink } from 'fs/promises';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { Redis } from 'ioredis';
-import { REDIS_HOTEL_KEY } from '../utils/redisKey';
 
 @Injectable()
 export class UploadImageHotelService {
@@ -27,17 +27,15 @@ export class UploadImageHotelService {
     );
 
     if (!hotel) {
-      throw new NotFoundException('Hotel Not Found');
+      throw new NotFoundException('Hotel not found.');
     }
 
     if (hotel.image) {
       const imageHotelFilePath = join(directory, hotel.image);
-      try {
+      const imageHotelFileExists = await stat(imageHotelFilePath);
+
+      if (imageHotelFileExists) {
         await unlink(imageHotelFilePath);
-      } catch (error) {
-        if (error.code !== 'ENOENT') {
-          throw error;
-        }
       }
     }
 

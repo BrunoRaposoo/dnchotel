@@ -64,7 +64,7 @@ describe('FindAllHotelsService', () => {
       hotel.updatedAt = new Date(hotel.updatedAt);
     });
 
-    expect(redis.get).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
+    expect(redis.get).toHaveBeenCalledWith(`${REDIS_HOTEL_KEY}:1:10`);
     expect(result.data).toEqual(hotelsFromRedis);
   });
 
@@ -73,12 +73,14 @@ describe('FindAllHotelsService', () => {
 
     const result = await service.execute();
 
-    expect(redis.get).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
+    expect(redis.get).toHaveBeenCalledWith(`${REDIS_HOTEL_KEY}:1:10`);
     expect(hotelRepository.findHotels).toHaveBeenCalledWith(0, 10);
     expect(hotelRepository.countHotels).toHaveBeenCalled();
     expect(redis.set).toHaveBeenCalledWith(
-      REDIS_HOTEL_KEY,
+      `${REDIS_HOTEL_KEY}:1:10`,
       JSON.stringify([hotelMock]),
+      'EX',
+      3600,
     );
     expect(result.data).toEqual([hotelMock]);
     expect(result.total).toEqual(1);
