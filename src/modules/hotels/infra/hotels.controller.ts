@@ -60,7 +60,7 @@ export class HotelsController {
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
   ) {
-    return this.findAllhotelsService.findAll(Number(page), Number(limit));
+    return this.findAllhotelsService.execute(Number(page), Number(limit));
   }
 
   @Roles(Role.ADMIN)
@@ -104,13 +104,13 @@ export class HotelsController {
   @Roles(Role.ADMIN)
   @Patch(':id')
   update(@ParamId() id: number, @Body() updateHotelDto: UpdateHotelDto) {
-    return this.updatehotelsService.update(id, updateHotelDto);
+    return this.updatehotelsService.execute(id, updateHotelDto);
   }
 
   @UseGuards(OwnerHotelGuard)
   @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@ParamId() id: number) {
-    return this.removeHotelsServoce.remove(id);
+    return this.removeHotelsServoce.execute(id);
   }
 }

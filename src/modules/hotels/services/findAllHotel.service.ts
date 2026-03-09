@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Redis } from 'ioredis';
+import { REDIS_HOTEL_KEY } from '../utils/redisKey';
 import { Hotel } from '@prisma/client';
 import { REPOSITORY_TOKEN_HOTEL } from '../utils/repositoriesToken';
-import { REDIS_HOTEL_KEY } from '../utils/redisKey';
 import type { IHotelRepository } from '../domain/repositories/IHotel.repositories';
 
 @Injectable()
